@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>conway</title>
+    <!-- <link href="style.css" rel="stylesheet" type="text/css" /> -->
+  </head>
+  <body>
+    <div id="title"><strong>Cellular Automata</strong></div>
+
+    <div id="outer"></div>
+
+    <div class="controls">
+      <input type="button" id="next" value="next">
+      <input type="button" id="auto" value="auto">
+      <div>
+        initial grid size: <input id="generate-input" type="text" style="width: 40px" placeholder="15"> <input type="button" id="generate" value="generate">
+      </div>
+      <div>
+        reset distribution ratio: <input id="populate-input" type="text" style="width: 40px" placeholder="0.15"> <input type="button" id="populate" value="populate">
+      </div>
+      
+      <table>
+        <tr>
+          <th></th>
+          <th>0</th>
+          <th>1</th>
+          <th>2</th>
+          <th>3</th>
+          <th>4</th>
+          <th>5</th>
+          <th>6</th>
+          <th>7</th>
+          <th>8</th>
+        </tr>
+        <tr>
+          <td><strong>survival rule:</strong></td>
+          <td><input type="checkbox" id="0" class="survival-rule"></td>
+          <td><input type="checkbox" id="1" class="survival-rule"></td>
+          <td><input type="checkbox" id="2" class="survival-rule" checked></td>
+          <td><input type="checkbox" id="3" class="survival-rule" checked></td>
+          <td><input type="checkbox" id="4" class="survival-rule"></td>
+          <td><input type="checkbox" id="5" class="survival-rule"></td>
+          <td><input type="checkbox" id="6" class="survival-rule"></td>
+          <td><input type="checkbox" id="7" class="survival-rule"></td>
+          <td><input type="checkbox" id="8" class="survival-rule"></td>
+        </tr>
+        <tr>
+          <td><strong>birth rule:</strong></td>          
+          <td><input type="checkbox" id="0" class="birth-rule"></td>
+          <td><input type="checkbox" id="1" class="birth-rule"></td>
+          <td><input type="checkbox" id="2" class="birth-rule"></td>
+          <td><input type="checkbox" id="3" class="birth-rule" checked></td>
+          <td><input type="checkbox" id="4" class="birth-rule"></td>
+          <td><input type="checkbox" id="5" class="birth-rule"></td>
+          <td><input type="checkbox" id="6" class="birth-rule"></td>
+          <td><input type="checkbox" id="7" class="birth-rule"></td>
+          <td><input type="checkbox" id="8" class="birth-rule"></td>
+        </tr>
+      </table>
+    </div>
+  </body>
+  <script src="main.js"></script>
+</html>
