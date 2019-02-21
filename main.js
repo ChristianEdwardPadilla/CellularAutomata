@@ -16,19 +16,20 @@ function gridGenerate(gridSize){
   if (isNaN(gridSize)){
     throw new Error('input must be a number')
   }
-  if (gridSize > 40){
-    gridSize = 40;
+  if (gridSize > 100){
+    gridSize = 100;
   }
   if (gridSize < 2){
     gridSize = 2;
   }
   //if there is already a grid, remove it
-  const outerContainer = document.querySelector('#outer');
   if (outerContainer.childNodes.length > 0){
-    outerContainer.innerHTML = '';
+    while (outerContainer.firstChild){
+      outerContainer.removeChild(outerContainer.firstChild);
+    }
   }
   //create the checkbox elements,add them to an array and append them to outerContainer
-  let pixels = [];
+  globalPixels = [];
   for (let i = 0; i < gridSize; i++){
     let rowContainer = document.createElement('div');
     rowContainer.classList.add('row');
@@ -39,17 +40,15 @@ function gridGenerate(gridSize){
       let id = (i*gridSize) + j;
       pixel.id = id;
       rowContainer.appendChild(pixel);
-      pixels.push(pixel);
+      globalPixels.push(pixel);
     }
   }
-  //return list of button elements
-  return pixels;
 }
 
 //wipe the grid and turn some back on randomly
-function gridPopulate(pixels, chance){
+function gridPopulate(chance){
   if (!chance) chance = 0.15;
-  for (let pixel of pixels){
+  for (let pixel of globalPixels){
     pixel.checked = false;
     let choice = Math.random();
     if (choice <= chance){
@@ -58,12 +57,12 @@ function gridPopulate(pixels, chance){
   }
 }
 
-function measureGrid(pixels){
-  const gS = Math.sqrt(pixels.length); //gS stands for gridSize
+function measureGrid(){
+  const gS = Math.sqrt(globalPixels.length); //gS stands for gridSize
   
   //reset neighborNumbers array
   neighborNumbers = [];
-  for (let i = 0; i < pixels.length; i++){
+  for (let i = 0; i < globalPixels.length; i++){
     neighborNumbers.push(0)
   }
   //allowed values (since they are all stored in one contiguous array)
@@ -74,13 +73,13 @@ function measureGrid(pixels){
   ];
   //look thru the pixels, 
   //if it is checked add 1 to all the nearby pixels' mappings (if within the grid)
-  for (let pixel of pixels){
+  for (let pixel of globalPixels){
     let id = parseInt(pixel.id);
     if (pixel.checked){
       for (let mapVal of mapping){
         let candidateIDX = id + mapVal;
         //out of bounds condition for above and below the grid
-        if (candidateIDX < 0 || candidateIDX > pixels.length-1) continue;
+        if (candidateIDX < 0 || candidateIDX > globalPixels.length-1) continue;
         //out of bounds condition for left edge of the grid
         if (id % gS === 0){
           if (mapVal === -1 || mapVal === -gS-1 || mapVal === gS-1) continue;
@@ -94,55 +93,57 @@ function measureGrid(pixels){
       }
     }
   }
-  // return neighborNumbers;
 }
 
 
-function updateGrid(pixels){
+function updateGrid(){
   for (let i = 0; i < neighborNumbers.length; i++){
-    if (pixels[i].checked){
-      if (!survivalNumbers.includes(neighborNumbers[i])) pixels[i].checked = false;
+    if (globalPixels[i].checked){
+      if (!survivalNumbers.includes(neighborNumbers[i])) globalPixels[i].checked = false;
     }else{
-      if (birthNumbers.includes(neighborNumbers[i])) pixels[i].checked = true;
+      if (birthNumbers.includes(neighborNumbers[i])) globalPixels[i].checked = true;
     }
   }
 }
 
-//every 500ms
+//every interval of speedInput.value, change the grid to its next state
 function mainLoop(){
   if (autoFlag){
-    measureGrid(globalPixels);
-    updateGrid(globalPixels);
-    setTimeout(mainLoop, 500);
+    measureGrid();
+    updateGrid();
+    setTimeout(mainLoop, 1000/parseInt(speedInput.value));
   }
 }
 
 //grab elements
+const outerContainer = document.querySelector('#outer');
 const nextButton = document.querySelector('#next');
 const autoButton = document.querySelector('#auto');
 const generateButton = document.querySelector('#generate');
 const populateButton = document.querySelector('#populate');
 const generateInput = document.querySelector('#generate-input');
 const populateInput = document.querySelector('#populate-input');
+const speedInput = document.querySelector('#speed');
 
 const survivalRule = document.querySelectorAll('.survival-rule');
 const birthRule = document.querySelectorAll('.birth-rule');
 
 //global stuff
+let globalPixels = [];
 let neighborNumbers = [];
 let survivalNumbers = [2,3];
 let birthNumbers = [3];
 let autoFlag = false;
 
 //initialization
-let globalPixels = gridGenerate(15);
-gridPopulate(globalPixels);
+gridGenerate(15);
+gridPopulate();
 
 document.addEventListener('DOMContentLoaded', function(){
   //buttons functionality
   //generate and populate buttons for the user to modify the grid
-  generateButton.addEventListener('click', () => {globalPixels = gridGenerate(generateInput.value)});
-  populateButton.addEventListener('click', () => {gridPopulate(globalPixels,populateInput.value)});
+  generateButton.addEventListener('click', () => gridGenerate(generateInput.value));
+  populateButton.addEventListener('click', () => gridPopulate(populateInput.value));
   //nextButton makes one step forward
   nextButton.addEventListener('click', () => {
     measureGrid(globalPixels);
