@@ -136,7 +136,7 @@ let birthNumbers = [3];
 let autoFlag = false;
 
 //initialization
-gridGenerate(15);
+gridGenerate(30);
 gridPopulate();
 
 document.addEventListener('DOMContentLoaded', function(){
