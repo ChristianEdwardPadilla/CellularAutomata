@@ -7,7 +7,7 @@
 //  neighborNumbers: an array where the value at each index indicates the number of neighbors the corresponding box has
 //  survivalNumbers: an array of numbers (input by user) that determines which checkboxes survive to the next frame
 //  birthNumbers: an array of numbers that determines which dead checkboxes become alive next frame
-//  autoFlag: a flag for whether the auto button is on or off (display next frame automatically when on)
+//  autoForwardFlag: a flag for whether the auto button is on or off (display next frame automatically when on)
 
 function gridGenerate(gridSize){
   //deal with bad inputs
@@ -112,7 +112,7 @@ function updateGrid(){
 
 //every interval of speedInput.value, change the grid to its next state
 function mainLoop(){
-  if (autoFlag){
+  if (autoForwardFlag){
     measureGrid();
     updateGrid();
     setTimeout(mainLoop, 1000/parseInt(speedInput.value));
@@ -122,7 +122,7 @@ function mainLoop(){
 //grab elements
 const outerContainer = document.querySelector('#outer');
 const nextButton = document.querySelector('#next');
-const autoButton = document.querySelector('#auto');
+const autoForwardButton = document.querySelector('#auto-forward');
 const generateButton = document.querySelector('#generate');
 const populateButton = document.querySelector('#populate');
 const generateInput = document.querySelector('#generate-input');
@@ -137,7 +137,7 @@ let globalPixels = [];
 let neighborNumbers = [];
 let survivalNumbers = [2,3];
 let birthNumbers = [3];
-let autoFlag = false;
+let autoForwardFlag = false;
 
 //initialization
 gridGenerate(30);
@@ -153,9 +153,9 @@ document.addEventListener('DOMContentLoaded', function(){
     measureGrid(globalPixels);
     updateGrid(globalPixels);
   });
-  //autoButton sets up an interval to display the next frame
-  autoButton.addEventListener('click', () => {
-    autoFlag = !autoFlag;
+  //autoForwardButton sets up an interval to display the next forward frame
+  autoForwardButton.addEventListener('click', () => {
+    autoForwardFlag = !autoForwardFlag;
     mainLoop();
   });
 

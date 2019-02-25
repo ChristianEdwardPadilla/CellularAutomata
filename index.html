@@ -11,14 +11,24 @@
     <div id="outer"></div>
 
     <div class="controls">
-      <input type="button" id="next" value="next">
-      <input type="button" id="auto" value="auto">
-      <label for="speed"> animation speed:</label>
-      <input type="range" id="speed" name="speed" min="1" max="20">
-      <div>
+      <div class="main-buttons">
+        <input type="button" id="auto-backward" value="auto-backward">
+        <input type="button" id="back" value="back">
+        <input type="button" id="next" value="next">
+        <span class="auto-forward">
+          <input type="button" id="auto-forward" value="auto-forward">
+        </span>
+      </div>
+
+      <div class="speed-controls">
+          <label for="speed"> animation speed:</label>
+          <input type="range" id="speed" name="speed" min="1" max="20">    
+      </div>
+      
+      <div style="padding-top: 2px; padding-bottom: 2px">
         initial grid size: <input id="generate-input" type="text" style="width: 40px" placeholder="15"> <input type="button" id="generate" value="generate">
       </div>
-      <div>
+      <div style="padding-top: 2px; padding-bottom: 4px">
         reset distribution ratio: <input id="populate-input" type="text" style="width: 40px" placeholder="0.15"> <input type="button" id="populate" value="populate">
       </div>
       

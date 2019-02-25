@@ -27,3 +27,22 @@ body{
 #outer label input:checked ~ span {
   background-color: rgb(102, 102, 102);
 }
+
+.controls{
+  padding-top: 10px;
+}
+
+.auto-forward{
+  background-color: aqua;
+}
+
+.speed-controls{
+  position: relative;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.speed-controls label{
+  position: relative;
+  top: -6px;
+}
