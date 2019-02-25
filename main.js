@@ -35,11 +35,15 @@ function gridGenerate(gridSize){
     rowContainer.classList.add('row');
     outerContainer.appendChild(rowContainer);
     for (let j = 0; j < gridSize; j++){
+      let container = document.createElement('label');
       let pixel = document.createElement('input');
+      let color = document.createElement('span');
       pixel.type = 'checkbox';
       let id = (i*gridSize) + j;
       pixel.id = id;
-      rowContainer.appendChild(pixel);
+      container.appendChild(pixel);
+      container.appendChild(color);
+      rowContainer.appendChild(container);
       globalPixels.push(pixel);
     }
   }
