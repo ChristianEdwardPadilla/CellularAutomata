@@ -7,7 +7,14 @@
 //  neighborNumbers: an array where the value at each index indicates the number of neighbors the corresponding box has
 //  survivalNumbers: an array of numbers (input by user) that determines which checkboxes survive to the next frame
 //  birthNumbers: an array of numbers that determines which dead checkboxes become alive next frame
-//  autoForwardFlag: a flag for whether the auto button is on or off (display next frame automatically when on)
+//  autoFlag (forward and backward): a flag for whether the auto button is on or off (display next frame automatically when on)
+//
+//Lastly, memory is a global variable array that contains an array for each of the states that have been generated
+//  memory needs to be erased whenever the grid is changed in any way by the user (memory no longer relevant):
+//  memory needs to be added to whenever the grid moves forward
+//    
+
+//  GET WORKING FIRST: ADD STATES TO MEMORY, DON'T WORRY ABOUT ACCESSING THEM FOR GOING BACKWARDS YET
 
 function gridGenerate(gridSize){
   //deal with bad inputs
@@ -22,6 +29,10 @@ function gridGenerate(gridSize){
   if (gridSize < 2){
     gridSize = 2;
   }
+  //this function modifies the grid manually and therefore invalidates the memory, therefore reset the memory
+  memory = [];
+  memoryPointer = 0;
+
   //if there is already a grid, remove it
   if (outerContainer.childNodes.length > 0){
     while (outerContainer.firstChild){
@@ -51,6 +62,10 @@ function gridGenerate(gridSize){
 
 //wipe the grid and turn some back on randomly
 function gridPopulate(chance){
+  //this function modifies the grid manually and therefore invalidates the memory, therefore reset the memory
+  memory = [];
+  memoryPointer = 0;
+
   if (!chance) chance = 0.15;
   for (let pixel of globalPixels){
     pixel.checked = false;
@@ -64,10 +79,14 @@ function gridPopulate(chance){
 function measureGrid(){
   const gS = Math.sqrt(globalPixels.length); //gS stands for gridSize
   
+  //we only ever measure the grid if we are going to use its calculation in the next state update
+  //therefore we can save the state to memory here
+  let memoryEntry = [];
+  
   //reset neighborNumbers array
   neighborNumbers = [];
   for (let i = 0; i < globalPixels.length; i++){
-    neighborNumbers.push(0)
+    neighborNumbers.push(0);
   }
   //allowed values (since they are all stored in one contiguous array)
   let mapping = [
@@ -80,6 +99,7 @@ function measureGrid(){
   for (let pixel of globalPixels){
     let id = parseInt(pixel.id);
     if (pixel.checked){
+      memoryEntry.push(1);
       for (let mapVal of mapping){
         let candidateIDX = id + mapVal;
         //out of bounds condition for above and below the grid
@@ -95,13 +115,27 @@ function measureGrid(){
         //this mapVal + id combination passed the out-of-bounds test, so increment its neighbor value
         neighborNumbers[candidateIDX]++
       }
+    }else{
+      memoryEntry.push(0);
     }
   }
+  memory.push(memoryEntry);
 }
 
-
-function updateGrid(){
-  for (let i = 0; i < neighborNumbers.length; i++){
+function updateGridForward(memFlag){
+  //might not use memory to go forward, leaving this for now
+  if (memFlag){
+    for (let i = 0; i < globalPixels.length; i++){
+      if (memory[memoryPointer][i]){
+        globalPixels[i].checked = true;
+      }else{
+        globalPixels[i].checked = false;
+      }
+      memoryPointer++
+    }
+  }
+  //memory for the next state isn't defined, so will need to be accessed from the calculated neighborNumbers
+  for (let i = 0; i < globalPixels.length; i++){
     if (globalPixels[i].checked){
       if (!survivalNumbers.includes(neighborNumbers[i])) globalPixels[i].checked = false;
     }else{
@@ -110,19 +144,55 @@ function updateGrid(){
   }
 }
 
+function updateGridBackward(){
+  if (memory.length){
+    let memoryState = memory.pop();
+    for (let i = 0; i < globalPixels.length; i++){
+      if (memoryState[i]) {
+        globalPixels[i].checked = true;
+      }else{
+        globalPixels[i].checked = false;
+      }
+    }
+  }else{
+    console.log('No more memory to access, cannot go backwards!')
+  }
+}
+
 //every interval of speedInput.value, change the grid to its next state
-function mainLoop(){
+function mainForwardLoop(){
   if (autoForwardFlag){
+    // if(memory[0] && memoryPointer !== memory.length - 1){
+    //   updateGridForward(true);
+    // }else{
+    //   measureGrid();
+    //   updateGridForward();
+    // }
     measureGrid();
-    updateGrid();
-    setTimeout(mainLoop, 1000/parseInt(speedInput.value));
+    updateGridForward();
+    setTimeout(mainForwardLoop, 1000/parseInt(speedInput.value));
+  }
+}
+
+function mainBackwardLoop(){
+  if (autoBackwardFlag){
+    if (memory.length){
+      updateGridBackward();
+      setTimeout(mainBackwardLoop, 1000/parseInt(speedInput.value));
+    }else{
+      console.log('No more memory to access, cannot go backwards!')
+      autoBackwardButton.style.backgroundColor = ""
+      autoBackwardFlag = false;
+    }
   }
 }
 
 //grab elements
 const outerContainer = document.querySelector('#outer');
 const nextButton = document.querySelector('#next');
+const backButton = document.querySelector('#back');
 const autoForwardButton = document.querySelector('#auto-forward');
+const autoBackwardButton = document.querySelector('#auto-backward');
 const generateButton = document.querySelector('#generate');
 const populateButton = document.querySelector('#populate');
 const generateInput = document.querySelector('#generate-input');
@@ -138,6 +208,10 @@ let neighborNumbers = [];
 let survivalNumbers = [2,3];
 let birthNumbers = [3];
 let autoForwardFlag = false;
+let autoBackwardFlag = false;
+//memory will be an array of arrays where each inner array is a state
+let memory = [];
+let memoryPointer = 0;
 
 //initialization
 gridGenerate(30);
@@ -148,20 +222,47 @@ document.addEventListener('DOMContentLoaded', function(){
   //generate and populate buttons for the user to modify the grid
   generateButton.addEventListener('click', () => gridGenerate(generateInput.value));
   populateButton.addEventListener('click', () => gridPopulate(populateInput.value));
+
   //nextButton makes one step forward
   nextButton.addEventListener('click', () => {
-    measureGrid(globalPixels);
-    updateGrid(globalPixels);
+    //re-enable this if we want to use memory to go forward
+    // if(memory[0] && memoryPointer !== memory.length - 1){
+    //   updateGridForward(true);
+    // }else{
+    //   measureGrid();
+    //   updateGridForward();
+    // }
+    measureGrid();
+    updateGridForward();
   });
   //autoForwardButton sets up an interval to display the next forward frame
   autoForwardButton.addEventListener('click', () => {
+    if (!autoForwardFlag) {autoForwardButton.style.backgroundColor = "aqua"}
+    else{autoForwardButton.style.backgroundColor = ""}
     autoForwardFlag = !autoForwardFlag;
-    mainLoop();
+    mainForwardLoop();
+  });
+
+  //backButton makes one step forward
+  backButton.addEventListener('click', () => {
+    // measureGrid();
+    updateGridBackward();
+  });
+  //autoBackwardButton sets up an interval to display the next forward frame
+  autoBackwardButton.addEventListener('click', () => {
+    if (!autoBackwardFlag) {autoBackwardButton.style.backgroundColor = "aqua"}
+    else{autoBackwardButton.style.backgroundColor = ""}
+    autoBackwardFlag = !autoBackwardFlag;
+    mainBackwardLoop();
   });
 
   //change the rules when the ruleButtons are clicked
   for (let el of survivalRule){
     el.addEventListener('change', (event) => {
+      //this function modifies the grid and therefore invalidates the memory, therefore reset the memory
+      memory = [];
+      memoryPointer = 0;
+
       const pressedButtonIdx = parseInt(event.target.id);
       const ruleIdx = survivalNumbers.indexOf(pressedButtonIdx);
       if (ruleIdx !== -1) {survivalNumbers.splice(ruleIdx, 1)}
@@ -170,6 +271,10 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   for (let el of birthRule){
     el.addEventListener('change', (event) => {
+      //this function modifies the grid and therefore invalidates the memory, therefore reset the memory
+      memory = [];
+      memoryPointer = 0;
+      
       const pressedButtonIdx = parseInt(event.target.id);
       const ruleIdx = birthNumbers.indexOf(pressedButtonIdx);
       if (ruleIdx !== -1) {birthNumbers.splice(ruleIdx, 1)}
