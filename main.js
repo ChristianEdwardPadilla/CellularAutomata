@@ -14,7 +14,6 @@
 //  memory needs to be added to whenever the grid moves forward
 //    
 
-//  GET WORKING FIRST: ADD STATES TO MEMORY, DON'T WORRY ABOUT ACCESSING THEM FOR GOING BACKWARDS YET
 
 function gridGenerate(gridSize){
   //deal with bad inputs
