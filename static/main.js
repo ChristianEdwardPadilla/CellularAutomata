@@ -22,8 +22,8 @@ function gridGenerate(gridSize){
   if (isNaN(gridSize)){
     throw new Error('input must be a number')
   }
-  if (gridSize > 100){
-    gridSize = 100;
+  if (gridSize > 1000){
+    gridSize = 1000;
   }
   if (gridSize < 2){
     gridSize = 2;
